@@ -75,7 +75,7 @@ export class Oauth2Controller {
   public async microsoftCallback(
     @Query() cbQuery: CallbackQueryDto,
     @Res() res: FastifyReply,
-  ): Promise<FastifyReply> {
+  ): Promise<any> {
     const provider = OAuthProvidersEnum.MICROSOFT;
     const { displayName, mail } =
       await this.oauth2Service.getUserData<IMicrosoftUser>(provider, cbQuery);
@@ -109,7 +109,7 @@ export class Oauth2Controller {
   public async googleCallback(
     @Query() cbQuery: CallbackQueryDto,
     @Res() res: FastifyReply,
-  ): Promise<FastifyReply> {
+  ): Promise<any> {
     const provider = OAuthProvidersEnum.GOOGLE;
     const { name, email } = await this.oauth2Service.getUserData<IGoogleUser>(
       provider,
@@ -145,7 +145,7 @@ export class Oauth2Controller {
   public async facebookCallback(
     @Query() cbQuery: CallbackQueryDto,
     @Res() res: FastifyReply,
-  ): Promise<FastifyReply> {
+  ): Promise<any> {
     const provider = OAuthProvidersEnum.FACEBOOK;
     const { name, email } = await this.oauth2Service.getUserData<IFacebookUser>(
       provider,
@@ -181,12 +181,13 @@ export class Oauth2Controller {
   public async githubCallback(
     @Query() cbQuery: CallbackQueryDto,
     @Res() res: FastifyReply,
-  ): Promise<FastifyReply> {
+  ): Promise<any> {
     const provider = OAuthProvidersEnum.GITHUB;
     const { name, email } = await this.oauth2Service.getUserData<IGitHubUser>(
       provider,
       cbQuery,
     );
+
     return this.loginAndRedirect(res, provider, email, name);
   }
 
@@ -204,21 +205,23 @@ export class Oauth2Controller {
     provider: OAuthProvidersEnum,
     email: string,
     name: string,
-  ): Promise<FastifyReply> {
-    const [accessToken, refreshToken] = await this.oauth2Service.login(
-      provider,
-      email,
-      name,
-    );
-    return res
-      .cookie(this.cookieName, refreshToken, {
-        secure: !this.testing,
-        httpOnly: true,
-        signed: true,
-        path: this.cookiePath,
-        expires: new Date(Date.now() + this.refreshTime * 1000),
-      })
-      .status(HttpStatus.PERMANENT_REDIRECT)
-      .redirect(`${this.url}/?access_token=${accessToken}`);
+  ): Promise<any> {
+    return {} as any;
+
+    // const [accessToken, refreshToken] = await this.oauth2Service.login(
+    //   provider,
+    //   email,
+    //   name,
+    // );
+    // return res
+    //   .cookie(this.cookieName, refreshToken, {
+    //     secure: !this.testing,
+    //     httpOnly: true,
+    //     signed: true,
+    //     path: this.cookiePath,
+    //     expires: new Date(Date.now() + this.refreshTime * 1000),
+    //   })
+    //   .status(HttpStatus.PERMANENT_REDIRECT)
+    //   .redirect(`${this.url}/?access_token=${accessToken}`);
   }
 }

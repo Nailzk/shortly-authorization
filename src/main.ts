@@ -31,7 +31,7 @@ async function bootstrap() {
   app.register(fastifyCsrfProtection, { cookieOpts: { signed: true } });
   app.register(fastifyCors, {
     credentials: true,
-    origin: `https://${configService.get<string>('domain')}`,
+    origin: `*`,
   });
   app.useGlobalPipes(
     new ValidationPipe({
@@ -46,13 +46,11 @@ async function bootstrap() {
     .addBearerAuth()
     .addTag('Authentication API')
     .build();
+
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(
-    configService.get<number>('port'),
-    configService.get<boolean>('testing') ? '127.0.0.1' : '0.0.0.0',
-  );
+  await app.listen(configService.get<number>('port'));
 }
 
 bootstrap();

@@ -30,7 +30,6 @@ import {
 export class JwtService {
   private readonly jwtConfig: IJwt;
   private readonly issuer: string;
-  private readonly domain: string;
 
   constructor(
     private readonly configService: ConfigService,
@@ -38,7 +37,6 @@ export class JwtService {
   ) {
     this.jwtConfig = this.configService.get<IJwt>('jwt');
     this.issuer = this.configService.get<string>('id');
-    this.domain = this.configService.get<string>('domain');
   }
 
   private static async generateTokenAsync(
@@ -92,13 +90,11 @@ export class JwtService {
   public async generateToken(
     user: IUser,
     tokenType: TokenTypeEnum,
-    domain?: string | null,
     tokenId?: string,
   ): Promise<string> {
     const jwtOptions: jwt.SignOptions = {
       issuer: this.issuer,
       subject: user.email,
-      audience: domain ?? this.domain,
       algorithm: 'HS256',
     };
 
@@ -150,7 +146,6 @@ export class JwtService {
   >(token: string, tokenType: TokenTypeEnum): Promise<T> {
     const jwtOptions: jwt.VerifyOptions = {
       issuer: this.issuer,
-      audience: new RegExp(this.domain),
     };
 
     switch (tokenType) {
@@ -183,8 +178,8 @@ export class JwtService {
     tokenId?: string,
   ): Promise<[string, string]> {
     return Promise.all([
-      this.generateToken(user, TokenTypeEnum.ACCESS, domain, tokenId),
-      this.generateToken(user, TokenTypeEnum.REFRESH, domain, tokenId),
+      this.generateToken(user, TokenTypeEnum.ACCESS, tokenId),
+      this.generateToken(user, TokenTypeEnum.REFRESH, tokenId),
     ]);
   }
 }

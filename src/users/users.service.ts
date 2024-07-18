@@ -34,22 +34,31 @@ export class UsersService {
     @InjectRepository(OAuthProviderEntity)
     private readonly oauthProvidersRepository: EntityRepository<OAuthProviderEntity>,
     private readonly commonService: CommonService,
-  ) {}
+  ) {
+  }
 
   public async create(
     provider: OAuthProvidersEnum,
     email: string,
-    name: string,
+    firstName: string,
+    lastName: string,
     password?: string,
   ): Promise<UserEntity> {
     const isConfirmed = provider !== OAuthProvidersEnum.LOCAL;
     const formattedEmail = email.toLowerCase();
+
     await this.checkEmailUniqueness(formattedEmail);
-    const formattedName = this.commonService.formatName(name);
+
+    const formattedFirstName = this.commonService.formatName(firstName);
+    const formattedLastName = this.commonService.formatName(lastName);
+
     const user = this.usersRepository.create({
       email: formattedEmail,
-      name: formattedName,
-      username: await this.generateUsername(formattedName),
+      firstName: formattedFirstName,
+      lastName: formattedLastName,
+      username: await this.generateUsername(
+        formattedFirstName + formattedLastName,
+      ),
       password: isUndefined(password) ? 'UNSET' : await hash(password, 10),
       confirmed: isConfirmed,
       credentials: new CredentialsEmbeddable(isConfirmed),
@@ -152,11 +161,8 @@ export class UsersService {
     const { name, username } = dto;
 
     if (!isUndefined(name) && !isNull(name)) {
-      if (name === user.name) {
-        throw new BadRequestException('Name must be different');
-      }
-
-      user.name = this.commonService.formatName(name);
+      user.lastName = this.commonService.formatName(name);
+      user.firstName = this.commonService.formatName(name);
     }
     if (!isUndefined(username) && !isNull(username)) {
       const formattedUsername = dto.username.toLowerCase();
@@ -243,7 +249,8 @@ export class UsersService {
   public async findOrCreate(
     provider: OAuthProvidersEnum,
     email: string,
-    name: string,
+    firstName: string,
+    lastName: string,
   ): Promise<UserEntity> {
     const formattedEmail = email.toLowerCase();
     const user = await this.usersRepository.findOne(
@@ -256,7 +263,7 @@ export class UsersService {
     );
 
     if (isUndefined(user) || isNull(user)) {
-      return this.create(provider, email, name);
+      return this.create(provider, email, firstName, lastName);
     }
     if (
       isUndefined(

@@ -5,9 +5,10 @@
 */
 
 import { TemplateDelegate } from 'handlebars';
-import { ITemplatedData } from './template-data.interface';
+import { IConfirmationEmailData, IWelcomeEmailData } from './template-data.interface';
 
-export interface ITemplates {
-  confirmation: TemplateDelegate<ITemplatedData>;
-  resetPassword: TemplateDelegate<ITemplatedData>;
+export interface IEmailParts {
+  confirmation: TemplateDelegate<IConfirmationEmailData>;
+  resetPassword: TemplateDelegate<IConfirmationEmailData>;
+  welcome: TemplateDelegate<IWelcomeEmailData>
 }

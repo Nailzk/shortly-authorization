@@ -11,19 +11,34 @@ import { PasswordsDto } from './passwords.dto';
 
 export abstract class SignUpDto extends PasswordsDto {
   @ApiProperty({
-    description: 'The user name',
+    description: 'The user first name',
     minLength: 3,
     maxLength: 100,
     type: String,
   })
   @IsString()
   @Length(3, 100, {
-    message: 'Name has to be between 3 and 100 characters.',
+    message: 'First Name has to be between 3 and 100 characters.',
   })
   @Matches(NAME_REGEX, {
-    message: 'Name can only contain letters, dtos, numbers and spaces.',
+    message: 'First Name can only contain letters, dtos, numbers and spaces.',
   })
-  public name!: string;
+  public firstName!: string;
+
+  @ApiProperty({
+    description: 'The user last name',
+    minLength: 3,
+    maxLength: 100,
+    type: String,
+  })
+  @IsString()
+  @Length(3, 100, {
+    message: 'Last Name has to be between 3 and 100 characters.',
+  })
+  @Matches(NAME_REGEX, {
+    message: 'Last Name can only contain letters, dtos, numbers and spaces.',
+  })
+  public lastName!: string;
 
   @ApiProperty({
     description: 'The user email',

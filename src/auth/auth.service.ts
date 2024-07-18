@@ -45,16 +45,18 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
-  ) {}
+  ) {
+  }
 
   public async signUp(dto: SignUpDto, domain?: string): Promise<IMessage> {
-    const { name, email, password1, password2 } = dto;
-    this.comparePasswords(password1, password2);
+    const { firstName, lastName, email, password, confirmPassword } = dto;
+    this.comparePasswords(password, confirmPassword);
     const user = await this.usersService.create(
       OAuthProvidersEnum.LOCAL,
       email,
-      name,
-      password1,
+      firstName,
+      lastName,
+      password,
     );
     const confirmationToken = await this.jwtService.generateToken(
       user,
@@ -70,13 +72,18 @@ export class AuthService {
     domain?: string,
   ): Promise<IAuthResult> {
     const { confirmationToken } = dto;
+
     const { id, version } = await this.jwtService.verifyToken<IEmailToken>(
       confirmationToken,
       TokenTypeEnum.CONFIRMATION,
     );
     const user = await this.usersService.confirmEmail(id, version);
+
     const [accessToken, refreshToken] =
       await this.jwtService.generateAuthTokens(user, domain);
+
+    this.mailerService.sendWelcomeEmail(user);
+
     return { user, accessToken, refreshToken };
   }
 
@@ -149,13 +156,13 @@ export class AuthService {
   }
 
   public async resetPassword(dto: ResetPasswordDto): Promise<IMessage> {
-    const { password1, password2, resetToken } = dto;
+    const { password, confirmPassword, resetToken } = dto;
     const { id, version } = await this.jwtService.verifyToken<IEmailToken>(
       resetToken,
       TokenTypeEnum.RESET_PASSWORD,
     );
-    this.comparePasswords(password1, password2);
-    await this.usersService.resetPassword(id, version, password1);
+    this.comparePasswords(password, confirmPassword);
+    await this.usersService.resetPassword(id, version, password);
     return this.commonService.generateMessage('Password reset successfully');
   }
 
@@ -164,12 +171,12 @@ export class AuthService {
     dto: ChangePasswordDto,
     domain?: string,
   ): Promise<IAuthResult> {
-    const { password1, password2, password } = dto;
-    this.comparePasswords(password1, password2);
+    const { currentPassword, confirmPassword, password } = dto;
+    this.comparePasswords(password, confirmPassword);
     const user = await this.usersService.updatePassword(
       userId,
-      password1,
       password,
+      currentPassword,
     );
     const [accessToken, refreshToken] =
       await this.jwtService.generateAuthTokens(user, domain);

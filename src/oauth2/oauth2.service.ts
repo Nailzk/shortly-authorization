@@ -105,9 +105,10 @@ export class Oauth2Service {
   public async login(
     provider: OAuthProvidersEnum,
     email: string,
-    name: string,
+    firstName: string,
+    lastName: string,
   ): Promise<[string, string]> {
-    const user = await this.usersService.findOrCreate(provider, email, name);
+    const user = await this.usersService.findOrCreate(provider, email, firstName, lastName);
     return this.jwtService.generateAuthTokens(user);
   }
 

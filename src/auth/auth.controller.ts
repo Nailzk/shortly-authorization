@@ -53,18 +53,23 @@ import { OAuthProvidersResponseMapper } from './mappers/oauth-provider-response.
 @UseGuards(FastifyThrottlerGuard)
 export class AuthController {
   private readonly cookiePath = '/api/auth';
-  private readonly cookieName: string;
+
+  private readonly refreshCookieName: string;
   private readonly refreshTime: number;
-  private readonly testing: boolean;
+
+  private readonly accessCookieName: string;
+  private readonly accessTime: number;
 
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
   ) {
-    this.cookieName = this.configService.get<string>('REFRESH_COOKIE');
+    this.refreshCookieName = this.configService.get<string>('REFRESH_COOKIE');
+    this.accessCookieName = this.configService.get<string>('ACCESS_COOKIE');
+
     this.refreshTime = this.configService.get<number>('jwt.refresh.time');
-    this.testing = this.configService.get<boolean>('testing');
+    this.accessTime = this.configService.get<number>('jwt.access.time');
   }
 
   @Public()
@@ -104,6 +109,9 @@ export class AuthController {
     @Body() singInDto: SignInDto,
   ): Promise<void> {
     const result = await this.authService.signIn(singInDto, origin);
+
+    this.saveAccessCookie(res, result.accessToken);
+
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
       .send(AuthResponseMapper.map(result));
@@ -153,8 +161,10 @@ export class AuthController {
   ): Promise<void> {
     const token = this.refreshTokenFromReq(req);
     const message = await this.authService.logout(token);
+
     res
-      .clearCookie(this.cookieName, { path: this.cookiePath })
+      .clearCookie(this.refreshCookieName)
+      .clearCookie(this.accessCookieName)
       .header('Content-Type', 'application/json')
       .status(HttpStatus.OK)
       .send(message);
@@ -269,7 +279,7 @@ export class AuthController {
   }
 
   private refreshTokenFromReq(req: FastifyRequest): string {
-    const token: string | undefined = req.cookies[this.cookieName];
+    const token: string | undefined = req.cookies[this.refreshCookieName];
 
     if (isUndefined(token) || isNull(token)) {
       throw new UnauthorizedException();
@@ -284,16 +294,26 @@ export class AuthController {
     return value;
   }
 
+  private saveAccessCookie(
+    res: FastifyReply,
+    accessToken: string,
+  ): FastifyReply {
+    return res
+      .cookie(this.accessCookieName, accessToken, {
+        httpOnly: true,
+        expires: new Date(Date.now() + this.accessTime * 1000),
+      })
+      .header('Content-Type', 'application/json');
+  }
+
   private saveRefreshCookie(
     res: FastifyReply,
     refreshToken: string,
   ): FastifyReply {
     return res
-      .cookie(this.cookieName, refreshToken, {
-        secure: !this.testing,
+      .cookie(this.refreshCookieName, refreshToken, {
         httpOnly: true,
         signed: true,
-        path: this.cookiePath,
         expires: new Date(Date.now() + this.refreshTime * 1000),
       })
       .header('Content-Type', 'application/json');

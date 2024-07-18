@@ -16,6 +16,6 @@ export class MikroOrmConfig implements MikroOrmOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
 
   public createMikroOrmOptions(): MikroOrmModuleOptions {
-    return this.configService.get<MikroOrmModuleOptions>('db');
+    return { ...this.configService.get<MikroOrmModuleOptions>('db') };
   }
 }

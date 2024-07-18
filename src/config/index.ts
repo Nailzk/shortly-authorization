@@ -1,6 +1,6 @@
 /*
   Free and Open Source - GNU LGPLv3
-  Copyright © 2023
+  Copyright © 2024
   Afonso Barracha
 */
 
@@ -63,15 +63,11 @@ export function config(): IConfig {
         pass: process.env.EMAIL_PASSWORD,
       },
     },
-    db: testing
-      ? defineSqliteConfig({
-          ...dbOptions,
-          dbName: ':memory:',
-        })
-      : definePGConfig({
-          ...dbOptions,
-          clientUrl: process.env.DATABASE_URL,
-        }),
+    db: definePGConfig({
+      ...dbOptions,
+      clientUrl: process.env.DATABASE_URL,
+      debug: true,
+    }),
     redis: redisUrlParser(process.env.REDIS_URL),
     throttler: {
       ttl: parseInt(process.env.THROTTLE_TTL, 10),
@@ -84,33 +80,33 @@ export function config(): IConfig {
         isUndefined(process.env.MICROSOFT_CLIENT_SECRET)
           ? null
           : {
-              id: process.env.MICROSOFT_CLIENT_ID,
-              secret: process.env.MICROSOFT_CLIENT_SECRET,
-            },
+            id: process.env.MICROSOFT_CLIENT_ID,
+            secret: process.env.MICROSOFT_CLIENT_SECRET,
+          },
       google:
         isUndefined(process.env.GOOGLE_CLIENT_ID) ||
         isUndefined(process.env.GOOGLE_CLIENT_SECRET)
           ? null
           : {
-              id: process.env.GOOGLE_CLIENT_ID,
-              secret: process.env.GOOGLE_CLIENT_SECRET,
-            },
+            id: process.env.GOOGLE_CLIENT_ID,
+            secret: process.env.GOOGLE_CLIENT_SECRET,
+          },
       facebook:
         isUndefined(process.env.FACEBOOK_CLIENT_ID) ||
         isUndefined(process.env.FACEBOOK_CLIENT_SECRET)
           ? null
           : {
-              id: process.env.FACEBOOK_CLIENT_ID,
-              secret: process.env.FACEBOOK_CLIENT_SECRET,
-            },
+            id: process.env.FACEBOOK_CLIENT_ID,
+            secret: process.env.FACEBOOK_CLIENT_SECRET,
+          },
       github:
         isUndefined(process.env.GITHUB_CLIENT_ID) ||
         isUndefined(process.env.GITHUB_CLIENT_SECRET)
           ? null
           : {
-              id: process.env.GITHUB_CLIENT_ID,
-              secret: process.env.GITHUB_CLIENT_SECRET,
-            },
+            id: process.env.GITHUB_CLIENT_ID,
+            secret: process.env.GITHUB_CLIENT_SECRET,
+          },
     },
   };
 }

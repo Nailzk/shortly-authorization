@@ -31,9 +31,17 @@ export class UserEntity implements IUser {
   @IsString()
   @Length(3, 100)
   @Matches(NAME_REGEX, {
-    message: 'Name must not have special characters',
+    message: 'First name must not have special characters',
   })
-  public name: string;
+  public firstName: string;
+
+  @Property({ columnType: 'varchar', length: 100 })
+  @IsString()
+  @Length(3, 100)
+  @Matches(NAME_REGEX, {
+    message: 'Last name must not have special characters',
+  })
+  public lastName: string;
 
   @Property({ columnType: 'varchar', length: 106 })
   @IsString()

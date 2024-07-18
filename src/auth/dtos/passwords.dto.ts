@@ -21,7 +21,7 @@ export abstract class PasswordsDto {
     message:
       'Password requires a lowercase letter, an uppercase letter, and a number or symbol',
   })
-  public password1!: string;
+  public password!: string;
 
   @ApiProperty({
     description: 'Password confirmation',
@@ -30,5 +30,5 @@ export abstract class PasswordsDto {
   })
   @IsString()
   @MinLength(1)
-  public password2!: string;
+  public confirmPassword!: string;
 }

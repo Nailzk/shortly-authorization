@@ -18,13 +18,22 @@ export class AuthResponseUserMapper implements IAuthResponseUser {
   public id: number;
 
   @ApiProperty({
-    description: 'User name',
-    example: 'John Doe',
+    description: 'User First Name',
+    example: 'John',
     minLength: 3,
     maxLength: 100,
     type: String,
   })
-  public name: string;
+  public firstName: string;
+
+  @ApiProperty({
+    description: 'User Last Name',
+    example: 'Doe',
+    minLength: 3,
+    maxLength: 100,
+    type: String,
+  })
+  public lastName: string;
 
   @ApiProperty({
     description: 'User username',
@@ -64,7 +73,8 @@ export class AuthResponseUserMapper implements IAuthResponseUser {
   public static map(user: IUser): AuthResponseUserMapper {
     return new AuthResponseUserMapper({
       id: user.id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       username: user.username,
       email: user.email,
       createdAt: user.createdAt.toISOString(),

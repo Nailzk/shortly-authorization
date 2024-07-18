@@ -4,7 +4,9 @@
   Afonso Barracha
 */
 
-export interface ITemplatedData {
+export interface IConfirmationEmailData {
   name: string;
   link: string;
 }
+
+export type IWelcomeEmailData = Pick<IConfirmationEmailData, 'name'>;
